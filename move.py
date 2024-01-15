@@ -1,82 +1,71 @@
-import os
-import sys
 import random
-from copy import deepcopy
-from itertools import product
 
 import pygame
 
-pygame.init()
-size = width, height = 300, 300
-screen = pygame.display.set_mode(size)
 
-
-def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
-    if not os.path.isfile(fullname):
-        print(f"Файл с изображением '{fullname}' не найден")
-        sys.exit()
-    image = pygame.image.load(fullname)
-    if colorkey is not None:
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-        image.set_colorkey(colorkey)
-    else:
-        image = image.convert_alpha()
-    return image
-
-
-class Cr(pygame.sprite.Sprite):
-    image = load_image("creature.png")
-    move = 10
-
-    def __init__(self, *group):
-        super().__init__(*group)
-        self.image = Cr.image
-        self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
+class MovingSquare:
+    def __init__(self):
+        self.color = 0
+        self.pos = [10, 10]
+        self.dx, self.dy = 0, 0
 
     def process_event(self, event):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RIGHT:
-                self.rect.x += 10
+                self.dx = 10
             elif event.key == pygame.K_LEFT:
-                self.rect.x -= 10
+                self.dx = -10
             elif event.key == pygame.K_UP:
-                self.rect.y -= 10
+                self.dy = -10
             elif event.key == pygame.K_DOWN:
-                self.rect.y += 10
+                self.dy = 10
+        elif event.type == pygame.KEYUP:
+            if event.key in (pygame.K_RIGHT, pygame.K_LEFT):
+                self.dx = 0
+            elif event.key in (pygame.K_UP, pygame.K_DOWN):
+                self.dy = 0
 
+    def move(self):
+        self.color = (self.color + 1) % 256
+        self.pos[0] += self.dx
+        self.pos[1] += self.dy
 
-class GroupCr(pygame.sprite.Group):
-    def process_event(self, event):
-        for sprite in self.sprites():
-            sprite.process_event(event)
+    def draw(self, screen):
+        screen.fill((self.color, self.color, self.color), (*self.pos, 50, 50))
 
 
 if __name__ == '__main__':
-    all_sprites = GroupCr()
-    #
-    # for _ in range(4):
-    Cr(all_sprites)
+    pygame.init()
+    size = width, height = 800, 400
+    screen = pygame.display.set_mode(size)
 
     running = True
     fps = 30
     clock = pygame.time.Clock()
+    MY_EVENT = pygame.USEREVENT + 1
+    pygame.time.set_timer(MY_EVENT, 1000)
 
+    ms = MovingSquare()
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                all_sprites.process_event(event)
-
+                ms.process_event(event)
+            elif event.type == pygame.KEYUP:
+                ms.process_event(event)
+            if event.type == MY_EVENT:
+                screen.fill((0, 0, 0),
+                            (0, 0, width, height))
+                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                for i in range(100):
+                    screen.fill(color,
+                                (random.random() * width,
+                                 random.random() * height, 5, 5))
         # обновление экрана
-        screen.fill((255, 255, 255))
-        all_sprites.update()
-        all_sprites.draw(screen)
-        pygame.display.flip()
+        ms.move()
+        ms.draw(screen)
 
+        pygame.display.flip()
         clock.tick(fps)
     pygame.quit()
