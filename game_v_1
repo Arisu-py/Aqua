@@ -1,0 +1,27 @@
+import pygame
+
+if __name__ == '__main__':
+    pygame.init()
+    pygame.display.set_caption('Я слежу за тобой!')
+    size = width, height = 100, 100
+    screen = pygame.display.set_mode(size)
+    screen = screen.fill("black")
+
+    running = True
+    text_color = (255, 0, 0)
+    counter = 0
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.ACTIVEEVENT:
+                if event.state == pygame.APPACTIVE and event.gain == 0:
+                    counter += 1
+                    text_surface = screen.render(str(counter), True, (255, 0, 0))
+
+        text = screen
+        text_rect = text.get_rect(center=(width // 2, height // 2))  # Размещаем текст по центру окна
+        screen.blit(text, text_rect)
+        pygame.display.flip()
+
+    pygame.quit()
