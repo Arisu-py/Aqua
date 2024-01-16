@@ -1,0 +1,250 @@
+import pygame
+import random
+import os
+import sys
+
+WIDTH = 800
+HEIGHT = 650
+FPS = 60
+
+# Задаем цвета
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (27, 99, 109)
+BLUE = (0, 0, 255)
+LIGHT_BLUE = (153, 217, 234)
+
+pygame.init()
+pygame.mixer.init()
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+pygame.display.set_caption("Aquarium")
+
+clock = pygame.time.Clock()
+game_over = True
+running = True
+pygame.mixer.music.load("The_road_without_you.mp3")
+# pygame.mixer.music.play(-1)
+pygame.mixer.music.queue('Cream_Sunshine_Of_Your_Love.mp3')
+font_name = pygame.font.match_font('arial')
+score = 0
+
+
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if colorkey == -1:
+        colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    image = image.convert_alpha()
+    return image
+
+
+class Perl(pygame.sprite.Sprite):
+    # pass
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = load_image("perl.png")
+        self.image = pygame.transform.scale(self.image, (50, 30))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+
+    def update(self):
+        if pygame.sprite.collide_mask(self, player):
+            perls.remove(self)
+            all_sprites.remove(self)
+            player.score += 1
+            print(player.score)
+            newperl()
+
+
+class Gold_Perl(pygame.sprite.Sprite):
+    # pass
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = load_image("golden_perl.png")
+        self.image = pygame.transform.scale(self.image, (50, 30))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+
+    def update(self):
+        if pygame.sprite.collide_mask(self, player):
+            perls.remove(self)
+            all_sprites.remove(self)
+            player.score += 1
+            print(player.score)
+            newgoldperl()
+
+
+class Fish(pygame.sprite.Sprite):
+    # pass
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_image("fishes.png")
+        self.image = pygame.transform.scale(self.image, (200, 100))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+
+    def update(self):
+        self.rect.x -= 1
+        if self.rect.x <= -200:
+            self.rect.x = WIDTH
+        if pygame.sprite.collide_mask(self, player) and not player.el:
+            # perls.remove(self)
+            # all_sprites.remove(self)
+            pygame.time.set_timer(EL, 2500)
+            player.image = load_image("el_fish_r.png")
+            player.image = pygame.transform.scale(player.image, (200, 100))
+            player.el = True
+
+
+
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.score = 0
+        self.image = load_image("fish_r1.png")
+        self.image = pygame.transform.scale(self.image, (200, 100))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.el = False
+        self.str = "r"
+
+    def update(self):
+        keystate = pygame.key.get_pressed()
+        if keystate[pygame.K_LEFT]:
+            self.str = "l"
+            self.image = load_image("fish_l1.png")
+            self.image = pygame.transform.scale(self.image, (200, 100))
+            self.rect.x -= 8
+        if keystate[pygame.K_RIGHT]:
+            self.str = "r"
+            self.image = load_image("fish_r1.png")
+            self.image = pygame.transform.scale(self.image, (200, 100))
+            self.rect.x += 8
+        if keystate[pygame.K_UP]:
+            self.rect.y -= 8
+        if keystate[pygame.K_DOWN]:
+            self.rect.y += 8
+        if self.rect.x > WIDTH:
+            self.rect.x = 0
+        if self.rect.x < 0:
+            self.rect.x = WIDTH
+        if self.rect.y > HEIGHT:
+            self.rect.y = 0
+        if self.rect.y < 0:
+            self.rect.y = HEIGHT
+
+
+# def show_go_screen(score, high_score):
+#     screen.blit(background, background_rect)
+#     draw_text(screen, "AQUARIUM", 64, WIDTH / 2, HEIGHT / 4)
+#     draw_text(screen, "Score:" + str(score), 30, WIDTH / 2, 260)
+#     draw_text(screen, "High score:" + str(high_score), 30, WIDTH / 2, 300)
+#     draw_text(screen, "Press space to begin", 22,
+#               WIDTH / 2, 370)
+#     pygame.display.flip()
+#     waiting = True
+#     while waiting:
+#         clock.tick(FPS)
+#         keystate = pygame.key.get_pressed()
+#         if keystate[pygame.K_SPACE]:
+#             waiting = False
+#         for event in pygame.event.get():
+#             if event.type == pygame.QUIT:
+#                 pygame.quit()
+
+
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, GREEN)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surf.blit(text_surface, text_rect)
+    # Загружаем звуковое сопровождение
+    pickup_sound = pygame.mixer.Sound("pickup.wav")
+    pygame.mixer.music.load("Harp.mp3")
+    pygame.mixer.music.play(-1)
+    # Загружаем фон
+    background = pygame.image.load("aquarium.png")
+    background_rect = background.get_rect()
+
+
+# Функция, создающая аквариумных рыбок
+def newfish():
+    f = Fish()
+    all_sprites.add(f)
+    fishes.add(f)
+
+
+# Функция, создающая жемчужины
+def newperl():
+    p = Perl()
+    all_sprites.add(p)
+    perls.add(p)
+
+def newgoldperl():
+    p = Gold_Perl()
+    all_sprites.add(p)
+    perls.add(p)
+
+while running:
+    if game_over:
+        GOLGPERL = pygame.USEREVENT + 1
+        pygame.time.set_timer(GOLGPERL, 0)
+        EL = pygame.USEREVENT + 2
+        pygame.time.set_timer(EL, 0)
+        game_over = False
+        all_sprites = pygame.sprite.Group()
+        fishes = pygame.sprite.Group()
+        perls = pygame.sprite.Group()
+        player = Player()
+        all_sprites.add(player)
+        for i in range(4):
+            newfish()
+        for i in range(5):
+            newperl()
+        score = 0
+
+    # pickup_sound = pygame.mixer.Sound("pickup.wav")
+
+    clock.tick(FPS)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        if event.type == GOLGPERL:
+            newgoldperl()
+        if event.type == EL:
+            pygame.time.set_timer(EL, 0)
+            player.image = load_image("fish_r1.png")
+            player.image = pygame.transform.scale(player.image, (200, 100))
+            player.el = False
+
+    screen.fill(LIGHT_BLUE)
+    # hits = pygame.sprite.collide_mask(player, Perl)
+    # if hits:
+    # pickup_sound.play()
+    # score += 1
+    # print(score)
+    # newperl()
+    # # Проверка на столкновение с другими рыбами
+    # hits = pygame.sprite.collide_mask(player, fishes, False)
+    # if hits:
+    #     game_over = True
+    all_sprites.update()
+    all_sprites.draw(screen)
+    pygame.display.flip()
+pygame.quit()
+
+# Проверка поймала ли рыбка жемчужину
