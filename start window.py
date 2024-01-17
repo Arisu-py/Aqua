@@ -46,6 +46,7 @@ if __name__ == '__main__':
     background.fill(pygame.Color("#00416a"))
     manager = pygame_gui.UIManager((800, 600))
 
+
     def load_image(name, colorkey=None):
         fullname = os.path.join('data', name)
         if not os.path.isfile(fullname):
@@ -64,7 +65,7 @@ if __name__ == '__main__':
             relative_rect=pygame.Rect((370, 90), (300, 50)),
             text='Sign in',
             manager=manager
-            )
+        )
 
         sign_up = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((370, 170), (300, 50)),
@@ -135,18 +136,22 @@ if __name__ == '__main__':
             manager.draw_ui(window_surface)
             pygame.display.update()
 
+
     def registration():
         nickname = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 80), (400, 50))
+            relative_rect=pygame.Rect((10, 80), (400, 50)),
+
         )
 
         password = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 180), (400, 50))
+            relative_rect=pygame.Rect((10, 180), (400, 50)),
         )
+        password.set_text_hidden(is_hidden=True)
 
         clone_password = pygame_gui.elements.UITextEntryLine(
             relative_rect=pygame.Rect((10, 280), (400, 50))
         )
+        clone_password.set_text_hidden(is_hidden=True)
 
         registrate = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((450, 180), (200, 50)),
@@ -276,6 +281,7 @@ if __name__ == '__main__':
             manager.draw_ui(window_surface)
             pygame.display.update()
 
+
     def enter():
         nick = pygame_gui.elements.UITextEntryLine(
             relative_rect=pygame.Rect((10, 100), (400, 50))
@@ -284,6 +290,7 @@ if __name__ == '__main__':
         password = pygame_gui.elements.UITextEntryLine(
             relative_rect=pygame.Rect((10, 220), (400, 50))
         )
+        password.set_text_hidden(is_hidden=True)
 
         enter_check = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((450, 160), (200, 50)),
@@ -366,5 +373,6 @@ if __name__ == '__main__':
             window_surface.blit(background, (0, 0))
             manager.draw_ui(window_surface)
             pygame.display.update()
+
 
     main_menu()
