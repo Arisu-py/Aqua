@@ -79,7 +79,7 @@ class Heart(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (60, 70))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.center = ((50 * player.live_1 + 30), 80)
+        self.rect.center = ((135 - 50 * player.live_1), 80)
 
     def update(self):
         if player.live < 3 and player.live_f:
@@ -174,11 +174,11 @@ class Fugu(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (150, 80))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.center = (WIDTH + 50, random.randint(300, HEIGHT))
+        self.rect.center = (WIDTH + 50, random.randint(400, HEIGHT))
 
     def update(self):
         self.rect.x -= 1
-        if self.rect.x < -300:
+        if self.rect.x < -273:
             fishes.remove(self)
             all_sprites.remove(self)
         if pygame.sprite.collide_mask(self, player) and not player.el_fu:
@@ -186,11 +186,9 @@ class Fugu(pygame.sprite.Sprite):
             self.image = load_image("fugu_s.png")
             self.image = pygame.transform.scale(self.image, (270, 200))
             player.el_fu = True
-            if pygame.sprite.collide_mask(self, player) and not player.el_fu_b:
-                pygame.time.set_timer(FUGU_EL_B, 7000)
-                player.live -= 1
-                player.live_f = True
-                player.el_fu_b = True
+        if pygame.sprite.collide_mask(self, player) and not player.el_fu_b and player.el_fu:
+            pygame.time.set_timer(FUGU_EL_B_11, 1000)
+
 
 
 class Fish(pygame.sprite.Sprite):
@@ -263,25 +261,6 @@ class Player(pygame.sprite.Sprite):
             self.rect.y = HEIGHT
 
 
-# def show_go_screen(score, high_score):
-#     screen.blit(background, background_rect)
-#     draw_text(screen, "AQUARIUM", 64, WIDTH / 2, HEIGHT / 4)
-#     draw_text(screen, "Score:" + str(score), 30, WIDTH / 2, 260)
-#     draw_text(screen, "High score:" + str(high_score), 30, WIDTH / 2, 300)
-#     draw_text(screen, "Press space to begin", 22,
-#               WIDTH / 2, 370)
-#     pygame.display.flip()
-#     waiting = True
-#     while waiting:
-#         clock.tick(FPS)
-#         keystate = pygame.key.get_pressed()
-#         if keystate[pygame.K_SPACE]:
-#             waiting = False
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 pygame.quit()
-
-
 # Функция, создающая аквариумных рыбок
 def newfish():
     fish = Fish()
@@ -296,6 +275,7 @@ def neweel():
     fishes.add(e)
 
 
+# Функция, создающая рыбу фугу
 def newfugu():
     fu = Fugu()
     all_sprites.add(fu)
@@ -370,6 +350,9 @@ while running:
         FUGU_EL_B = pygame.USEREVENT + 10
         pygame.time.set_timer(FUGU_EL_B, 0)
 
+        FUGU_EL_B_11 = pygame.USEREVENT + 11
+        pygame.time.set_timer(FUGU_EL_B_11, 0)
+
         game_over = False
 
         all_sprites = pygame.sprite.Group()
@@ -440,6 +423,14 @@ while running:
         if event.type == FUGU_EL_B:
             pygame.time.set_timer(FUGU_EL_B, 0)
             player.el_fu_b = False
+
+        if event.type == FUGU_EL_B_11:
+            pygame.time.set_timer(FUGU_EL_B_11, 0)
+            pygame.time.set_timer(FUGU_EL_B, 1000)
+            player.live -= 1
+            player.live_f = True
+            player.el_fu_b = True
+
 
     screen.blit(background, (0, 0))
     all_sprites.update()
