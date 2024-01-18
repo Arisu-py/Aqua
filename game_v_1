@@ -93,6 +93,11 @@ class Heart(pygame.sprite.Sprite):
                 newheart()
             player.live_f1 = False
 
+        if player.el_shark:
+            for i in range(3):
+                hearts.remove(self)
+                all_sprites.remove(self)
+
 
 class Green_Perl(pygame.sprite.Sprite):
     def __init__(self):
@@ -209,6 +214,32 @@ class Urchin(pygame.sprite.Sprite):
                 self.speedx = 1
 
 
+class Shark(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_image("shark.png")
+        self.image = pygame.transform.scale(self.image, (650, 450))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (WIDTH + 326, random.randint(400, HEIGHT - 280))
+        self.speed = -1
+
+    def update(self):
+        self.rect.x -= 1
+        if self.rect.x < -653:
+            fishes.remove(self)
+            all_sprites.remove(self)
+        if pygame.sprite.collide_mask(self, player) and not player.el_shark:
+            player.live -= 3
+            player.live_f = True
+            player.background = 0
+            self.speed = 0
+            player.speed = 0
+
+
+            player.el_shark = True
+
+
 class Fugu(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -230,7 +261,6 @@ class Fugu(pygame.sprite.Sprite):
             player.live -= 1
             player.live_f = True
             player.el_fu = True
-
 
 
 class Fish(pygame.sprite.Sprite):
@@ -264,12 +294,14 @@ class Player(pygame.sprite.Sprite):
         self.el = False
         self.el_f = False
         self.el_fu = False
+        self.el_shark = False
         self.str = "r"
         self.speed = 8
         self.live = 3
         self.live_1 = 0
         self.live_f = False
         self.live_f1 = False
+        self.background = 1
 
     def update(self):
         keystate = pygame.key.get_pressed()
@@ -315,6 +347,13 @@ def neweel():
     e = Eel()
     all_sprites.add(e)
     fishes.add(e)
+
+
+# Функция, создающая акулу
+def newshark():
+    s = Shark()
+    all_sprites.add(s)
+    fishes.add(s)
 
 
 # Функция, создающая рыбу фугу
@@ -395,6 +434,9 @@ while running:
         GREENPERL = pygame.USEREVENT + 13
         pygame.time.set_timer(GREENPERL, random.randint(75000, 150000))
 
+        SHARK = pygame.USEREVENT + 14
+        pygame.time.set_timer(SHARK, 10000)
+
         game_over = False
 
         all_sprites = pygame.sprite.Group()
@@ -432,6 +474,9 @@ while running:
 
         if event.type == GREENPERL:
             newgreenperl()
+
+        if event.type == SHARK:
+            newshark()
 
         if event.type == EL:
             pygame.time.set_timer(EL, 0)
@@ -483,7 +528,10 @@ while running:
                 pygame.mixer.music.pause()
             if event.key == pygame.K_u:
                 pygame.mixer.music.unpause()
-
+    if player.background == 0:
+        background = load_image("blood.png")
+    elif player.background == 2:
+        background = load_image("black.png")
     screen.blit(background, (0, 0))
     all_sprites.update()
     all_sprites.draw(screen)
