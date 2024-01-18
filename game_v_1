@@ -214,6 +214,25 @@ class Urchin(pygame.sprite.Sprite):
                 self.speedx = 1
 
 
+class Fisher(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_image("fisher.png")
+        self.image = pygame.transform.scale(self.image, (650, 450))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (WIDTH + 326, random.randint(400, HEIGHT - 280))
+        self.speed = -2
+
+    def update(self):
+        self.rect.x -= 2
+        if self.rect.x < -653:
+            fishes.remove(self)
+            all_sprites.remove(self)
+        pygame.time.set_timer(BLACK, 4000)
+        player.background = 2
+
+
 class Shark(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -235,7 +254,6 @@ class Shark(pygame.sprite.Sprite):
             player.background = 0
             self.speed = 0
             player.speed = 0
-
 
             player.el_shark = True
 
@@ -356,6 +374,13 @@ def newshark():
     fishes.add(s)
 
 
+# Функция, создающая удильщика
+def newfisher():
+    fi = Fisher()
+    all_sprites.add(fi)
+    fishes.add(fi)
+
+
 # Функция, создающая рыбу фугу
 def newfugu():
     fu = Fugu()
@@ -435,7 +460,13 @@ while running:
         pygame.time.set_timer(GREENPERL, random.randint(75000, 150000))
 
         SHARK = pygame.USEREVENT + 14
-        pygame.time.set_timer(SHARK, 10000)
+        pygame.time.set_timer(SHARK, 300000)
+
+        FISHER = pygame.USEREVENT + 15
+        pygame.time.set_timer(FISHER, 100000)
+
+        BLACK = pygame.USEREVENT + 16
+        pygame.time.set_timer(BLACK, 7000)
 
         game_over = False
 
@@ -478,6 +509,9 @@ while running:
         if event.type == SHARK:
             newshark()
 
+        if event.type == FISHER:
+            newfisher()
+
         if event.type == EL:
             pygame.time.set_timer(EL, 0)
             if player.str == "r":
@@ -496,6 +530,10 @@ while running:
         if event.type == BIGSPEED:
             pygame.time.set_timer(BIGSPEED, 0)
             player.speed = 8
+
+        if event.type == BLACK:
+            pygame.time.set_timer(BLACK, 0)
+            player.background = 3
 
         if event.type == SMALLSPEED:
             pygame.time.set_timer(SMALLSPEED, 0)
@@ -528,10 +566,15 @@ while running:
                 pygame.mixer.music.pause()
             if event.key == pygame.K_u:
                 pygame.mixer.music.unpause()
+
     if player.background == 0:
         background = load_image("blood.png")
     elif player.background == 2:
         background = load_image("black.png")
+    elif player.background == 3:
+        background = load_image("fon_all.png")
+        player.background = 1
+
     screen.blit(background, (0, 0))
     all_sprites.update()
     all_sprites.draw(screen)
