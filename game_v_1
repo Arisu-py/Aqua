@@ -3,17 +3,9 @@ import random
 import os
 import sys
 
-WIDTH = 800
-HEIGHT = 650
+WIDTH = 1366
+HEIGHT = 768
 FPS = 60
-
-# Задаем цвета
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (27, 99, 109)
-BLUE = (0, 0, 255)
-LIGHT_BLUE = (153, 217, 234)
 
 pygame.init()
 pygame.mixer.init()
@@ -27,8 +19,9 @@ running = True
 pygame.mixer.music.load("The_road_without_you.mp3")
 # pygame.mixer.music.play(-1)
 pygame.mixer.music.queue('Cream_Sunshine_Of_Your_Love.mp3')
+pygame.mixer.music.queue('Angie.mp3')
+pygame.mixer.music.queue('Gi.mp3')
 font_name = pygame.font.match_font('arial')
-score = 0
 
 
 def load_image(name, colorkey=None):
@@ -44,6 +37,20 @@ def load_image(name, colorkey=None):
     return image
 
 
+font_name = pygame.font.match_font('arial')
+
+
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, "white")
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surf.blit(text_surface, text_rect)
+
+
+background = load_image("fon_all.png")
+
+
 class Perl(pygame.sprite.Sprite):
     # pass
     def __init__(self):
@@ -53,7 +60,7 @@ class Perl(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (50, 30))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        self.rect.center = (random.randint(30, WIDTH - 10), random.randint(10, HEIGHT - 50))
 
     def update(self):
         if pygame.sprite.collide_mask(self, player):
@@ -64,8 +71,25 @@ class Perl(pygame.sprite.Sprite):
             newperl()
 
 
+class Heart(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = load_image("heart.png")
+        self.image = pygame.transform.scale(self.image, (60, 70))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = ((50 * player.live_1 + 30), 80)
+
+    def update(self):
+        if player.live < 3 and player.live_f:
+            for i in range(3 - player.live):
+                hearts.remove(self)
+                all_sprites.remove(self)
+            player.live_f = False
+
+
 class Gold_Perl(pygame.sprite.Sprite):
-    # pass
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
@@ -73,77 +97,169 @@ class Gold_Perl(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (50, 30))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        self.rect.center = (random.randint(10, WIDTH - 10), random.randint(10, HEIGHT - 50))
 
     def update(self):
         if pygame.sprite.collide_mask(self, player):
             perls.remove(self)
             all_sprites.remove(self)
-            player.score += 1
-            print(player.score)
-            newgoldperl()
+            pygame.time.set_timer(BIGSPEED, 3000)
+            player.score += 10
+            player.speed = 10
+
+
+class Eel(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_image("eel.png")
+        self.image = pygame.transform.scale(self.image, (300, 100))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (WIDTH + 300, random.randint(200, HEIGHT))
+
+    def update(self):
+        self.rect.x -= 1
+        if pygame.sprite.collide_mask(self, player) and not player.el:
+            pygame.time.set_timer(EL, 2500)
+            if player.str == "r":
+                player.image = load_image("el_fish_r.png")
+            else:
+                player.image = load_image("el_fish_l.png")
+            player.image = pygame.transform.scale(player.image, (200, 100))
+            player.score -= 10
+            player.el = True
+        if self.rect.x < -300:
+            fishes.remove(self)
+            all_sprites.remove(self)
+
+
+class Urchin(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_image("urchin.png")
+        self.image = pygame.transform.scale(self.image, (50, 50))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (random.randint(0, WIDTH), HEIGHT - 30)
+        self.speedx = -1
+        self.speed_f = 1
+        self.el = False
+
+    def update(self):
+        self.rect.x += self.speedx
+
+        if pygame.sprite.collide_mask(self, player) and not self.el:
+            pygame.time.set_timer(URCHIN, 5000)
+            self.speedx = 0
+            self.el = True
+
+        if self.rect.x >= WIDTH - 51:
+            self.speed_f = 1
+            if self.el:
+                self.speedx = -10
+            else:
+                self.speedx = -1
+        elif self.rect.x <= 3:
+            self.speed_f = 0
+            if self.el:
+                self.speedx = 10
+            else:
+                self.speedx = 1
+
+
+class Fugu(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_image("fugu_l.png")
+        self.image = pygame.transform.scale(self.image, (150, 80))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (WIDTH + 50, random.randint(300, HEIGHT))
+
+    def update(self):
+        self.rect.x -= 1
+        if self.rect.x < -300:
+            fishes.remove(self)
+            all_sprites.remove(self)
+        if pygame.sprite.collide_mask(self, player) and not player.el_fu:
+            pygame.time.set_timer(FUGU_EL, 7000)
+            self.image = load_image("fugu_s.png")
+            self.image = pygame.transform.scale(self.image, (270, 200))
+            player.el_fu = True
+            if pygame.sprite.collide_mask(self, player) and not player.el_fu_b:
+                pygame.time.set_timer(FUGU_EL_B, 7000)
+                player.live -= 1
+                player.live_f = True
+                player.el_fu_b = True
 
 
 class Fish(pygame.sprite.Sprite):
-    # pass
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.image = load_image("fishes.png")
         self.image = pygame.transform.scale(self.image, (200, 100))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.center = (random.randint(0, WIDTH), random.randint(0, HEIGHT))
+        self.rect.center = (random.randint(0, WIDTH), random.randint(40, HEIGHT))
 
     def update(self):
         self.rect.x -= 1
         if self.rect.x <= -200:
             self.rect.x = WIDTH
-        if pygame.sprite.collide_mask(self, player) and not player.el:
-            # perls.remove(self)
-            # all_sprites.remove(self)
-            pygame.time.set_timer(EL, 2500)
-            player.image = load_image("el_fish_r.png")
-            player.image = pygame.transform.scale(player.image, (200, 100))
-            player.el = True
-
-
+        if pygame.sprite.collide_mask(self, player) and not player.el_f:
+            pygame.time.set_timer(FISH_EL, 1000)
+            player.score -= 1
+            player.el_f = True
 
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.score = 0
-        self.image = load_image("fish_r1.png")
+        self.image = load_image("fish_r.png")
         self.image = pygame.transform.scale(self.image, (200, 100))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.center = (WIDTH / 2, HEIGHT / 2)
         self.el = False
+        self.el_f = False
+        self.el_fu = False
+        self.el_fu_b = False
         self.str = "r"
+        self.speed = 8
+        self.live = 3
+        self.live_1 = 0
+        self.live_f = False
 
     def update(self):
         keystate = pygame.key.get_pressed()
         if keystate[pygame.K_LEFT]:
             self.str = "l"
-            self.image = load_image("fish_l1.png")
+            if self.el:
+                self.image = load_image("el_fish_l.png")
+            else:
+                self.image = load_image("fish_l.png")
             self.image = pygame.transform.scale(self.image, (200, 100))
-            self.rect.x -= 8
+            self.rect.x -= self.speed
         if keystate[pygame.K_RIGHT]:
             self.str = "r"
-            self.image = load_image("fish_r1.png")
+            if self.el:
+                self.image = load_image("el_fish_r.png")
+            else:
+                self.image = load_image("fish_r.png")
             self.image = pygame.transform.scale(self.image, (200, 100))
-            self.rect.x += 8
+            self.rect.x += self.speed
         if keystate[pygame.K_UP]:
-            self.rect.y -= 8
+            self.rect.y -= self.speed
         if keystate[pygame.K_DOWN]:
-            self.rect.y += 8
+            self.rect.y += self.speed
         if self.rect.x > WIDTH:
-            self.rect.x = 0
-        if self.rect.x < 0:
+            self.rect.x = -90
+        if self.rect.x < -190:
             self.rect.x = WIDTH
         if self.rect.y > HEIGHT:
-            self.rect.y = 0
-        if self.rect.y < 0:
+            self.rect.y = -90
+        if self.rect.y < -90:
             self.rect.y = HEIGHT
 
 
@@ -166,26 +282,24 @@ class Player(pygame.sprite.Sprite):
 #                 pygame.quit()
 
 
-def draw_text(surf, text, size, x, y):
-    font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, GREEN)
-    text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
-    surf.blit(text_surface, text_rect)
-    # Загружаем звуковое сопровождение
-    pickup_sound = pygame.mixer.Sound("pickup.wav")
-    pygame.mixer.music.load("Harp.mp3")
-    pygame.mixer.music.play(-1)
-    # Загружаем фон
-    background = pygame.image.load("aquarium.png")
-    background_rect = background.get_rect()
-
-
 # Функция, создающая аквариумных рыбок
 def newfish():
-    f = Fish()
-    all_sprites.add(f)
-    fishes.add(f)
+    fish = Fish()
+    all_sprites.add(fish)
+    fishes.add(fish)
+
+
+# Функция, создающая электрических угрей
+def neweel():
+    e = Eel()
+    all_sprites.add(e)
+    fishes.add(e)
+
+
+def newfugu():
+    fu = Fugu()
+    all_sprites.add(fu)
+    fishes.add(fu)
 
 
 # Функция, создающая жемчужины
@@ -194,57 +308,142 @@ def newperl():
     all_sprites.add(p)
     perls.add(p)
 
+
+# Функция, создающая золотые жемчужины
 def newgoldperl():
     p = Gold_Perl()
     all_sprites.add(p)
     perls.add(p)
 
+
+# Функция, создающая сердца
+def newheart():
+    h = Heart()
+    all_sprites.add(h)
+    hearts.add(h)
+
+
+# # Функция, создающая зеленые жемчужины
+# def newgrenperl():
+#     p = Green_Perl()
+#     all_sprites.add(p)
+#     perls.add(p)
+#
+#
+# # Функция, создающая голубые жемчужины
+# def newblueperl():
+#     p = Blue_Perl()
+#     all_sprites.add(p)
+#     perls.add(p)
+
+
 while running:
     if game_over:
+
         GOLGPERL = pygame.USEREVENT + 1
-        pygame.time.set_timer(GOLGPERL, 0)
+        pygame.time.set_timer(GOLGPERL, 30000)
+
         EL = pygame.USEREVENT + 2
         pygame.time.set_timer(EL, 0)
+
+        EeL_POW = pygame.USEREVENT + 3
+        pygame.time.set_timer(EeL_POW, random.randint(20000, 70000))
+
+        BIGSPEED = pygame.USEREVENT + 4
+        pygame.time.set_timer(BIGSPEED, 3000)
+
+        SMALLSPEED = pygame.USEREVENT + 5
+        pygame.time.set_timer(BIGSPEED, 3000)
+
+        URCHIN = pygame.USEREVENT + 6
+        pygame.time.set_timer(URCHIN, 0)
+
+        FISH_EL = pygame.USEREVENT + 7
+        pygame.time.set_timer(FISH_EL, 0)
+
+        Fugu_POW = pygame.USEREVENT + 8
+        pygame.time.set_timer(Fugu_POW, random.randint(1000, 11000))
+
+        FUGU_EL = pygame.USEREVENT + 9
+        pygame.time.set_timer(FUGU_EL, 0)
+
+        FUGU_EL_B = pygame.USEREVENT + 10
+        pygame.time.set_timer(FUGU_EL_B, 0)
+
         game_over = False
+
         all_sprites = pygame.sprite.Group()
         fishes = pygame.sprite.Group()
         perls = pygame.sprite.Group()
+        hearts = pygame.sprite.Group()
+
         player = Player()
+        urchin = Urchin()
+
+        all_sprites.add(urchin)
         all_sprites.add(player)
+
         for i in range(4):
             newfish()
         for i in range(5):
             newperl()
+        for i in range(player.live):
+            player.live_1 = i
+            newheart()
+
         score = 0
 
-    # pickup_sound = pygame.mixer.Sound("pickup.wav")
-
     clock.tick(FPS)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
         if event.type == GOLGPERL:
             newgoldperl()
+
         if event.type == EL:
             pygame.time.set_timer(EL, 0)
-            player.image = load_image("fish_r1.png")
+            if player.str == "r":
+                player.image = load_image("fish_r.png")
+            else:
+                player.image = load_image("fish_l.png")
             player.image = pygame.transform.scale(player.image, (200, 100))
             player.el = False
 
-    screen.fill(LIGHT_BLUE)
-    # hits = pygame.sprite.collide_mask(player, Perl)
-    # if hits:
-    # pickup_sound.play()
-    # score += 1
-    # print(score)
-    # newperl()
-    # # Проверка на столкновение с другими рыбами
-    # hits = pygame.sprite.collide_mask(player, fishes, False)
-    # if hits:
-    #     game_over = True
+        if event.type == EeL_POW:
+            neweel()
+
+        if event.type == Fugu_POW:
+            newfugu()
+
+        if event.type == BIGSPEED:
+            pygame.time.set_timer(BIGSPEED, 0)
+            player.speed = 8
+
+        if event.type == URCHIN:
+            pygame.time.set_timer(URCHIN, 0)
+            if urchin.speed_f == 1:
+                urchin.speedx = -1
+            else:
+                urchin.speedx = 1
+            urchin.el = False
+
+        if event.type == FISH_EL:
+            pygame.time.set_timer(FISH_EL, 0)
+            player.el_f = False
+
+        if event.type == FUGU_EL:
+            pygame.time.set_timer(FUGU_EL, 0)
+            player.el_fu = False
+
+        if event.type == FUGU_EL_B:
+            pygame.time.set_timer(FUGU_EL_B, 0)
+            player.el_fu_b = False
+
+    screen.blit(background, (0, 0))
     all_sprites.update()
     all_sprites.draw(screen)
+    draw_text(screen, str(player.score), 40, 30, 10)
     pygame.display.flip()
 pygame.quit()
-
-# Проверка поймала ли рыбка жемчужину
