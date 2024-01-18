@@ -5,6 +5,28 @@ import sys
 import sqlite3
 import hashlib
 from string import digits
+from b import game
+
+STATE = 'menu'
+
+
+class Player:
+    def __init__(self, name):
+        self.name = name
+
+    def different_in_max_score(self, new_score):
+        con = sqlite3.connect('players.db')
+        result = con.cursor().execute(f"""SELECT score FROM player
+                                    WHERE nickname=?
+                                    """, (self.name,)).fetchone()
+        if result[0] < new_score:
+            res = con.cursor().execute(f"""UPDATE player SET score=? WHERE nickname=?
+                                    """, (new_score, self.name,))
+            con.commit()
+            con.close()
+
+    def game_start(self):
+        game()
 
 
 class PasswordError(Exception):
@@ -61,6 +83,7 @@ if __name__ == '__main__':
 
 
     def main_menu():
+        global STATE
         sign_in = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((370, 90), (300, 50)),
             text='Sign in',
@@ -89,7 +112,8 @@ if __name__ == '__main__':
         clock = pygame.time.Clock()
 
         run = True
-        while run:
+
+        while run and STATE == 'menu':
             sign_in.show()
             sign_up.show()
             end.show()
@@ -283,6 +307,7 @@ if __name__ == '__main__':
 
 
     def enter():
+        global STATE
         nick = pygame_gui.elements.UITextEntryLine(
             relative_rect=pygame.Rect((10, 100), (400, 50))
         )
@@ -329,8 +354,12 @@ if __name__ == '__main__':
             if result:
                 if not (hashlib.md5(password.text.encode())).hexdigest() == result[0][0]:
                     clue.set_text("You made a mistake in your username or password")
+                    return False
+                else:
+                    return True
             else:
                 clue.set_text("You made a mistake in your username or password")
+                return False
 
         clock = pygame.time.Clock()
         running = True
@@ -356,7 +385,17 @@ if __name__ == '__main__':
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == enter_check:
                         if sign_in():
-                            pass
+                            running = False
+                            STATE = 'game'
+                            nick.hide()
+                            password.hide()
+                            enter_check.hide()
+                            enter_text.hide()
+                            nick_text.hide()
+                            pass_text.hide()
+                            clue.hide()
+                            player = Player(nick.text)
+                            player.game_start()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
