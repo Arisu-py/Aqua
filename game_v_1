@@ -16,12 +16,12 @@ pygame.display.set_caption("Aquarium")
 clock = pygame.time.Clock()
 game_over = True
 running = True
-pygame.mixer.music.load("The_road_without_you.mp3")
-# pygame.mixer.music.play(-1)
-pygame.mixer.music.queue('Cream_Sunshine_Of_Your_Love.mp3')
-pygame.mixer.music.queue('Angie.mp3')
 pygame.mixer.music.queue('Gi.mp3')
 font_name = pygame.font.match_font('arial')
+musik = {1: "Satisfaction.mp3", 5: "The_road_without_you.mp3", 2: 'Angie.mp3', 3: "Another_Brick_In_The_Wall.mp3",
+         4: 'Gi.mp3'}
+
+m_num = 0
 
 
 def load_image(name, colorkey=None):
@@ -37,9 +37,6 @@ def load_image(name, colorkey=None):
     return image
 
 
-font_name = pygame.font.match_font('arial')
-
-
 def draw_text(surf, text, size, x, y):
     font = pygame.font.Font(font_name, size)
     text_surface = font.render(text, True, "white")
@@ -52,7 +49,6 @@ background = load_image("fon_all.png")
 
 
 class Perl(pygame.sprite.Sprite):
-    # pass
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
 
@@ -67,7 +63,6 @@ class Perl(pygame.sprite.Sprite):
             perls.remove(self)
             all_sprites.remove(self)
             player.score += 1
-            print(player.score)
             newperl()
 
 
@@ -79,14 +74,61 @@ class Heart(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (60, 70))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.center = ((135 - 50 * player.live_1), 80)
+        self.rect.center = ((50 * player.live - 50 * player.live_1 - 10), 80)
 
     def update(self):
-        if player.live < 3 and player.live_f:
+        if player.live_f:
             for i in range(3 - player.live):
                 hearts.remove(self)
                 all_sprites.remove(self)
             player.live_f = False
+
+        if player.live_f1:
+            for i in range(player.live - 1):
+                hearts.remove(self)
+                all_sprites.remove(self)
+
+            for i in range(player.live):
+                player.live_1 = i
+                newheart()
+            player.live_f1 = False
+
+
+class Green_Perl(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = load_image("green_perl.png")
+        self.image = pygame.transform.scale(self.image, (46, 23))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (random.randint(10, WIDTH - 10), random.randint(10, HEIGHT - 50))
+
+    def update(self):
+        if pygame.sprite.collide_mask(self, player):
+            perls.remove(self)
+            all_sprites.remove(self)
+            if player.live < 3:
+                player.live += 1
+                player.live_f1 = True
+
+
+class Blue_Perl(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.image = load_image("blue_perl.png")
+        self.image = pygame.transform.scale(self.image, (46, 23))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.center = (random.randint(10, WIDTH - 10), random.randint(10, HEIGHT - 50))
+
+    def update(self):
+        if pygame.sprite.collide_mask(self, player):
+            perls.remove(self)
+            all_sprites.remove(self)
+            pygame.time.set_timer(SMALLSPEED, 3000)
+            player.score += 5
+            player.speed = 3
 
 
 class Gold_Perl(pygame.sprite.Sprite):
@@ -174,7 +216,7 @@ class Fugu(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (150, 80))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
-        self.rect.center = (WIDTH + 50, random.randint(400, HEIGHT))
+        self.rect.center = (WIDTH + 50, random.randint(100, HEIGHT - 280))
 
     def update(self):
         self.rect.x -= 1
@@ -182,12 +224,12 @@ class Fugu(pygame.sprite.Sprite):
             fishes.remove(self)
             all_sprites.remove(self)
         if pygame.sprite.collide_mask(self, player) and not player.el_fu:
-            pygame.time.set_timer(FUGU_EL, 7000)
+            pygame.time.set_timer(FUGU_EL, 1000)
             self.image = load_image("fugu_s.png")
             self.image = pygame.transform.scale(self.image, (270, 200))
+            player.live -= 1
+            player.live_f = True
             player.el_fu = True
-        if pygame.sprite.collide_mask(self, player) and not player.el_fu_b and player.el_fu:
-            pygame.time.set_timer(FUGU_EL_B_11, 1000)
 
 
 
@@ -222,12 +264,12 @@ class Player(pygame.sprite.Sprite):
         self.el = False
         self.el_f = False
         self.el_fu = False
-        self.el_fu_b = False
         self.str = "r"
         self.speed = 8
         self.live = 3
         self.live_1 = 0
         self.live_f = False
+        self.live_f1 = False
 
     def update(self):
         keystate = pygame.key.get_pressed()
@@ -303,18 +345,18 @@ def newheart():
     hearts.add(h)
 
 
-# # Функция, создающая зеленые жемчужины
-# def newgrenperl():
-#     p = Green_Perl()
-#     all_sprites.add(p)
-#     perls.add(p)
-#
-#
-# # Функция, создающая голубые жемчужины
-# def newblueperl():
-#     p = Blue_Perl()
-#     all_sprites.add(p)
-#     perls.add(p)
+# Функция, создающая зеленые жемчужины
+def newgreenperl():
+    p = Green_Perl()
+    all_sprites.add(p)
+    perls.add(p)
+
+
+# Функция, создающая голубые жемчужины
+def newblueperl():
+    p = Blue_Perl()
+    all_sprites.add(p)
+    perls.add(p)
 
 
 while running:
@@ -333,7 +375,7 @@ while running:
         pygame.time.set_timer(BIGSPEED, 3000)
 
         SMALLSPEED = pygame.USEREVENT + 5
-        pygame.time.set_timer(BIGSPEED, 3000)
+        pygame.time.set_timer(SMALLSPEED, 3000)
 
         URCHIN = pygame.USEREVENT + 6
         pygame.time.set_timer(URCHIN, 0)
@@ -342,16 +384,16 @@ while running:
         pygame.time.set_timer(FISH_EL, 0)
 
         Fugu_POW = pygame.USEREVENT + 8
-        pygame.time.set_timer(Fugu_POW, random.randint(1000, 11000))
+        pygame.time.set_timer(Fugu_POW, random.randint(45000, 200000))
 
         FUGU_EL = pygame.USEREVENT + 9
         pygame.time.set_timer(FUGU_EL, 0)
 
-        FUGU_EL_B = pygame.USEREVENT + 10
-        pygame.time.set_timer(FUGU_EL_B, 0)
+        BLUEPERL = pygame.USEREVENT + 12
+        pygame.time.set_timer(BLUEPERL, random.randint(15000, 70000))
 
-        FUGU_EL_B_11 = pygame.USEREVENT + 11
-        pygame.time.set_timer(FUGU_EL_B_11, 0)
+        GREENPERL = pygame.USEREVENT + 13
+        pygame.time.set_timer(GREENPERL, random.randint(75000, 150000))
 
         game_over = False
 
@@ -385,6 +427,12 @@ while running:
         if event.type == GOLGPERL:
             newgoldperl()
 
+        if event.type == BLUEPERL:
+            newblueperl()
+
+        if event.type == GREENPERL:
+            newgreenperl()
+
         if event.type == EL:
             pygame.time.set_timer(EL, 0)
             if player.str == "r":
@@ -404,6 +452,10 @@ while running:
             pygame.time.set_timer(BIGSPEED, 0)
             player.speed = 8
 
+        if event.type == SMALLSPEED:
+            pygame.time.set_timer(SMALLSPEED, 0)
+            player.speed = 8
+
         if event.type == URCHIN:
             pygame.time.set_timer(URCHIN, 0)
             if urchin.speed_f == 1:
@@ -420,17 +472,17 @@ while running:
             pygame.time.set_timer(FUGU_EL, 0)
             player.el_fu = False
 
-        if event.type == FUGU_EL_B:
-            pygame.time.set_timer(FUGU_EL_B, 0)
-            player.el_fu_b = False
-
-        if event.type == FUGU_EL_B_11:
-            pygame.time.set_timer(FUGU_EL_B_11, 0)
-            pygame.time.set_timer(FUGU_EL_B, 1000)
-            player.live -= 1
-            player.live_f = True
-            player.el_fu_b = True
-
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_r:
+                m_num += 1
+                if m_num > 5:
+                    m_num = 1
+                pygame.mixer.music.load(musik.get(m_num))
+                pygame.mixer.music.play(-1)
+            if event.key == pygame.K_p:
+                pygame.mixer.music.pause()
+            if event.key == pygame.K_u:
+                pygame.mixer.music.unpause()
 
     screen.blit(background, (0, 0))
     all_sprites.update()
