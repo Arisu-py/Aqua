@@ -5,7 +5,7 @@ import sys
 import sqlite3
 import hashlib
 from string import digits
-from b import game
+#from b import game
 
 STATE = 'menu'
 
@@ -25,8 +25,8 @@ class Player:
             con.commit()
             con.close()
 
-    def game_start(self):
-        game()
+    #def game_start(self):
+        #game()
 
 
 class PasswordError(Exception):
@@ -102,6 +102,12 @@ if __name__ == '__main__':
             manager=manager
         )
 
+        d = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((620, 330), (50, 50)),
+            text='D',
+            manager=manager
+        )
+
         menu = pygame_gui.elements.UILabel(
             relative_rect=pygame.Rect((470, 20), (100, 50)),
             text='Menu'
@@ -113,11 +119,15 @@ if __name__ == '__main__':
 
         run = True
 
+        #if STATE == 'game':
+            #game()
+
         while run and STATE == 'menu':
             sign_in.show()
             sign_up.show()
             end.show()
             menu.show()
+            d.show()
             background.blit(image, (10, 80))
             time_delta = clock.tick(60) / 1000.0
             for event in pygame.event.get():
@@ -138,13 +148,22 @@ if __name__ == '__main__':
                         sign_up.hide()
                         end.hide()
                         menu.hide()
+                        d.hide()
                         enter()
                     if event.ui_element == sign_up:
                         sign_in.hide()
                         sign_up.hide()
                         end.hide()
                         menu.hide()
+                        d.hide()
                         registration()
+                    if event.ui_element == d:
+                        sign_in.hide()
+                        sign_up.hide()
+                        end.hide()
+                        menu.hide()
+                        d.hide()
+                        donate()
                     if event.ui_element == end:
                         confirmation_dialog = pygame_gui.windows.UIConfirmationDialog(
                             rect=pygame.Rect((0, 0), (300, 200)),
@@ -394,8 +413,9 @@ if __name__ == '__main__':
                             nick_text.hide()
                             pass_text.hide()
                             clue.hide()
+                            #game()
                             player = Player(nick.text)
-                            player.game_start()
+                            player.different_in_max_score(10)
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
@@ -405,6 +425,174 @@ if __name__ == '__main__':
                         enter_text.hide()
                         nick_text.hide()
                         pass_text.hide()
+                        clue.hide()
+                manager.process_events(event)
+            background.fill('#00416a')
+            manager.update(time_delta)
+            window_surface.blit(background, (0, 0))
+            manager.draw_ui(window_surface)
+            pygame.display.update()
+
+
+    def donate():
+        menu = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((300, 5), (100, 50)),
+            text='Donate'
+        )
+
+        card_text = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((10, 55), (100, 50)),
+            text='Card number:'
+        )
+
+        card = pygame_gui.elements.UITextEntryLine(
+            relative_rect=pygame.Rect((10, 100), (400, 50))
+        )
+
+        monce_text = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((10, 155), (100, 50)),
+            text='Monce/Year::'
+        )
+
+        card_monce = pygame_gui.elements.UITextEntryLine(
+            relative_rect=pygame.Rect((10, 200), (150, 50))
+        )
+
+        csv_text = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((160, 155), (100, 50)),
+            text='CVC/CVV:'
+        )
+
+        card_csv = pygame_gui.elements.UITextEntryLine(
+            relative_rect=pygame.Rect((180, 200), (150, 50))
+        )
+
+        summ_text = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((10, 255), (100, 50)),
+            text='How much?:'
+        )
+
+        summ = pygame_gui.elements.UITextEntryLine(
+            relative_rect=pygame.Rect((10, 300), (150, 50))
+        )
+
+        ok = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((500, 150), (100, 50)),
+            text='OK',
+            manager=manager
+        )
+
+        clue = pygame_gui.elements.UILabel(
+            relative_rect=pygame.Rect((5, 350), (500, 50)),
+            text=''
+        )
+        clue.set_text('')
+
+        clock = pygame.time.Clock()
+        running = True
+
+        def get_card_number():
+            card_num = card.text
+            card_num = ''.join(card_num.split())
+            if card_num.isdigit() and len(card_num) == 16:
+                return card_num
+            else:
+                return 404
+
+        def double(x):
+            res = x * 2
+            if res > 9:
+                res = res - 9
+            return res
+
+        def luhn_algorithm():
+            n = card.text
+            odd = map(lambda x: double(int(x)), n[::2])
+            even = map(int, n[1::2])
+            return (sum(odd) + sum(even)) % 10 == 0
+
+        def date_and_cs():
+            if not card_monce.text:
+                return 101
+            month, year = card_monce.text.split('/')
+            if not (0 < int(month) < 13 and int(year) < 25):
+                return 101
+
+            elif len(card_csv.text) != 3:
+                return 102
+
+        def checking():
+            number = get_card_number()
+            number2 = date_and_cs()
+            if number == 404:
+                clue.set_text(
+                    "Enter only 16 digits. Spaces are allowed")
+            elif not luhn_algorithm():
+                clue.set_text(
+                    "The number is invalid. Try again.")
+            elif number2 == 101:
+                clue.set_text(
+                    "The wrong date was entered. Try again.")
+            elif number2 == 102:
+                clue.set_text(
+                    "Error in the csv code. Try again.")
+            elif not summ.text or int(summ.text) < 0:
+                clue.set_text('The payment amount was entered incorrectly.')
+            else:
+                clue.set_text('Completed successfully. Thanks)')
+
+        while running:
+            menu.show()
+            card.show()
+            card_text.show()
+            monce_text.show()
+            card_monce.show()
+            csv_text.show()
+            card_csv.show()
+            summ.show()
+            summ_text.show()
+            ok.show()
+            clue.show()
+            time_delta = clock.tick(60) / 1000.0
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    confirmation_dialog = pygame_gui.windows.UIConfirmationDialog(
+                        rect=pygame.Rect((300, 200), (300, 200)),
+                        manager=manager,
+                        window_title='Confirm',
+                        action_long_desc='Are you sure you want to get out? All data will be lost.',
+                        action_short_name='OK',
+                        blocking=True
+                    )
+                if event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
+                    run = False
+                    running = False
+                    menu.hide()
+                    card.hide()
+                    card_text.hide()
+                    monce_text.hide()
+                    card_monce.hide()
+                    csv_text.hide()
+                    card_csv.hide()
+                    summ.hide()
+                    summ_text.hide()
+                    ok.hide()
+                    clue.hide()
+                if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == ok:
+                        checking()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        menu.hide()
+                        card.hide()
+                        card_text.hide()
+                        monce_text.hide()
+                        card_monce.hide()
+                        csv_text.hide()
+                        card_csv.hide()
+                        summ.hide()
+                        summ_text.hide()
+                        ok.hide()
                         clue.hide()
                 manager.process_events(event)
             background.fill('#00416a')
