@@ -57,53 +57,55 @@ class NicknameError(PasswordError):
     pass
 
 
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if colorkey == -1:
+        colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    image = image.convert_alpha()
+    return image
+
+
 if __name__ == '__main__':
     pygame.init()
 
     pygame.display.set_caption('Start')
-    window_surface = pygame.display.set_mode((700, 400))
+    window_surface = pygame.display.set_mode((1366, 768))
 
     background = pygame.Surface((1366, 768))
 
     background.fill(pygame.Color("#00416a"))
     manager = pygame_gui.UIManager((1366, 768))
 
-
-    def load_image(name, colorkey=None):
-        fullname = os.path.join('data', name)
-        if not os.path.isfile(fullname):
-            print(f"Файл с изображением '{fullname}' не найден")
-            sys.exit()
-        image = pygame.image.load(fullname)
-        if colorkey == -1:
-            colorkey = image.get_at((0, 0))
-            image.set_colorkey(colorkey)
-        image = image.convert_alpha()
-        return image
-
+    f = load_image("black.png")
+    background.blit(f, (0, 0))
 
     def main_menu():
         global STATE
         sign_in = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((370, 90), (300, 50)),
+            relative_rect=pygame.Rect((703, 250), (300, 50)),
             text='Sign in',
             manager=manager
         )
 
         sign_up = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((370, 170), (300, 50)),
+            relative_rect=pygame.Rect((703, 330), (300, 50)),
             text='Sign up',
             manager=manager
         )
 
         end = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((370, 250), (300, 50)),
+            relative_rect=pygame.Rect((703, 410), (300, 50)),
             text='Exit',
             manager=manager
         )
 
         d = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((620, 330), (50, 50)),
+            relative_rect=pygame.Rect((953, 490), (50, 50)),
             text='D',
             manager=manager
         )
@@ -119,16 +121,13 @@ if __name__ == '__main__':
 
         run = True
 
-        #if STATE == 'game':
-            #game()
-
         while run and STATE == 'menu':
             sign_in.show()
             sign_up.show()
             end.show()
             menu.show()
             d.show()
-            background.blit(image, (10, 80))
+            background.blit(image, (343, 264))
             time_delta = clock.tick(60) / 1000.0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -166,7 +165,7 @@ if __name__ == '__main__':
                         donate()
                     if event.ui_element == end:
                         confirmation_dialog = pygame_gui.windows.UIConfirmationDialog(
-                            rect=pygame.Rect((0, 0), (300, 200)),
+                            rect=pygame.Rect((333, 160), (300, 200)),
                             manager=manager,
                             window_title='Confirm',
                             action_long_desc='Are you sure you want to get out?',
@@ -182,48 +181,48 @@ if __name__ == '__main__':
 
     def registration():
         nickname = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 80), (400, 50)),
+            relative_rect=pygame.Rect((343, 220), (400, 50)),
 
         )
 
         password = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 180), (400, 50)),
+            relative_rect=pygame.Rect((343, 340), (400, 50)),
         )
         password.set_text_hidden(is_hidden=True)
 
         clone_password = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 280), (400, 50))
+            relative_rect=pygame.Rect((343, 440), (400, 50))
         )
         clone_password.set_text_hidden(is_hidden=True)
 
         registrate = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((450, 180), (200, 50)),
+            relative_rect=pygame.Rect((783, 340), (200, 50)),
             text='Sign up',
             manager=manager
         )
 
         reg_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((300, 5), (100, 50)),
+            relative_rect=pygame.Rect((633, 165), (100, 50)),
             text='Registration'
         )
 
         nick_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((10, 40), (100, 50)),
+            relative_rect=pygame.Rect((343, 200), (100, 50)),
             text='Nickname:'
         )
 
         pass_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((10, 140), (100, 50)),
+            relative_rect=pygame.Rect((343, 300), (100, 50)),
             text='Password:'
         )
 
         clone_pass_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((5, 240), (200, 50)),
+            relative_rect=pygame.Rect((338, 400), (200, 50)),
             text='Repeat the password:'
         )
 
         clue = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((5, 330), (500, 50)),
+            relative_rect=pygame.Rect((338, 490), (500, 50)),
             text=''
         )
         clue.set_text('')
@@ -339,37 +338,37 @@ if __name__ == '__main__':
     def enter():
         global STATE
         nick = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 100), (400, 50))
+            relative_rect=pygame.Rect((343, 260), (400, 50))
         )
 
         password = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 220), (400, 50))
+            relative_rect=pygame.Rect((343, 380), (400, 50))
         )
         password.set_text_hidden(is_hidden=True)
 
         enter_check = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((450, 160), (200, 50)),
+            relative_rect=pygame.Rect((783, 320), (200, 50)),
             text='Sign in',
             manager=manager
         )
 
         enter_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((300, 10), (100, 50)),
+            relative_rect=pygame.Rect((633, 170), (100, 50)),
             text='Enter'
         )
 
         nick_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((10, 55), (100, 50)),
+            relative_rect=pygame.Rect((343, 215), (100, 50)),
             text='Nickname:'
         )
 
         pass_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((10, 175), (100, 50)),
+            relative_rect=pygame.Rect((343, 335), (100, 50)),
             text='Password:'
         )
 
         clue = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((5, 330), (500, 50)),
+            relative_rect=pygame.Rect((338, 490), (500, 50)),
             text=''
         )
         clue.set_text('')
@@ -424,9 +423,8 @@ if __name__ == '__main__':
                             nick_text.hide()
                             pass_text.hide()
                             clue.hide()
-                            #game()
                             player = Player(nick.text)
-                            player.different_in_max_score(10)
+                            player.game_start()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
@@ -447,56 +445,56 @@ if __name__ == '__main__':
 
     def donate():
         menu = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((300, 5), (100, 50)),
+            relative_rect=pygame.Rect((633, 165), (100, 50)),
             text='Donate'
         )
 
         card_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((10, 55), (100, 50)),
+            relative_rect=pygame.Rect((433, 215), (100, 50)),
             text='Card number:'
         )
 
         card = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 100), (400, 50))
+            relative_rect=pygame.Rect((343, 260), (400, 50))
         )
         card.set_text_hidden(is_hidden=True)
 
         monce_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((10, 155), (100, 50)),
+            relative_rect=pygame.Rect((343, 315), (100, 50)),
             text='Monce/Year::'
         )
 
         card_monce = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 200), (150, 50))
+            relative_rect=pygame.Rect((343, 360), (150, 50))
         )
 
         csv_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((160, 155), (100, 50)),
+            relative_rect=pygame.Rect((493, 315), (100, 50)),
             text='CVC/CVV:'
         )
 
         card_csv = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((180, 200), (150, 50))
+            relative_rect=pygame.Rect((513, 360), (150, 50))
         )
         card_csv.set_text_hidden(is_hidden=True)
 
         summ_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((10, 255), (100, 50)),
+            relative_rect=pygame.Rect((343, 415), (100, 50)),
             text='How much?:'
         )
 
         summ = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((10, 300), (150, 50))
+            relative_rect=pygame.Rect((343, 460), (150, 50))
         )
 
         ok = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((500, 150), (100, 50)),
+            relative_rect=pygame.Rect((833, 310), (100, 50)),
             text='OK',
             manager=manager
         )
 
         clue = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((5, 350), (500, 50)),
+            relative_rect=pygame.Rect((338, 510), (500, 50)),
             text=''
         )
         clue.set_text('')
