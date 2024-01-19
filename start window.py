@@ -5,7 +5,7 @@ import sys
 import sqlite3
 import hashlib
 from string import digits
-#from b import game
+from b import game
 
 STATE = 'menu'
 
@@ -25,8 +25,8 @@ class Player:
             con.commit()
             con.close()
 
-    #def game_start(self):
-        #game()
+    def game_start(self):
+        game()
 
 
 class PasswordError(Exception):
@@ -63,10 +63,10 @@ if __name__ == '__main__':
     pygame.display.set_caption('Start')
     window_surface = pygame.display.set_mode((700, 400))
 
-    background = pygame.Surface((800, 600))
+    background = pygame.Surface((1366, 768))
 
     background.fill(pygame.Color("#00416a"))
-    manager = pygame_gui.UIManager((800, 600))
+    manager = pygame_gui.UIManager((1366, 768))
 
 
     def load_image(name, colorkey=None):
@@ -305,7 +305,16 @@ if __name__ == '__main__':
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == registrate:
                         if check_password():
-                            pass
+                            running = False
+                            nickname.hide()
+                            password.hide()
+                            clone_password.hide()
+                            registrate.hide()
+                            reg_text.hide()
+                            nick_text.hide()
+                            pass_text.hide()
+                            clone_pass_text.hide()
+                            clue.hide()
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -316,6 +325,8 @@ if __name__ == '__main__':
                         registrate.hide()
                         reg_text.hide()
                         nick_text.hide()
+                        pass_text.hide()
+                        clone_pass_text.hide()
                         clue.hide()
                 manager.process_events(event)
             background.fill('#00416a')
@@ -514,13 +525,15 @@ if __name__ == '__main__':
             return (sum(odd) + sum(even)) % 10 == 0
 
         def date_and_cs():
-            if not card_monce.text:
+            if not card_monce.text or len(card_monce.text) > 5 or len(card_monce.text) < 5 or\
+                    not card_monce.text[:1].isdigit() or not card_monce.text[:1].isdigit() or\
+                    not card_monce.text[2] == '/':
                 return 101
             month, year = card_monce.text.split('/')
-            if not (0 < int(month) < 13 and int(year) < 25):
+            card_csv.set_text_hidden(True)
+            if not (0 < int(month) < 13 and int(year) > 23):
                 return 101
-
-            elif len(card_csv.text) != 3:
+            elif len(card_csv.text) != 3 or not card_csv.text.isdigit():
                 return 102
 
         def checking():
