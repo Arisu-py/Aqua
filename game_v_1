@@ -23,7 +23,18 @@ def load_image(name, colorkey=None):
     return image
 
 
-def game_over():
+font_name = pygame.font.match_font('arial')
+
+
+def draw_text(surf, text, size, x, y):
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, "white")
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surf.blit(text_surface, text_rect)
+
+
+def game_over(x):
     WIDTH = 1366
     HEIGHT = 768
 
@@ -32,6 +43,15 @@ def game_over():
     pygame.display.set_caption("Game_over")
     pygame.display.set_icon(load_image("eel_zn1.ico"))
 
+    font_name = pygame.font.match_font('arial')
+
+    def draw_text(surf, text, size, x, y):
+        font = pygame.font.Font(font_name, size)
+        text_surface = font.render(text, True, "white")
+        text_rect = text_surface.get_rect()
+        text_rect.midtop = (x, y)
+        surf.blit(text_surface, text_rect)
+
     background = load_image("blood_g.png")
     running = True
 
@@ -39,6 +59,9 @@ def game_over():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
+        print(x)
+        # draw_text(screen, str(x), 40, 30, 10)
         screen.blit(background, (0, 0))
         pygame.display.flip()
     pygame.quit()
@@ -63,12 +86,14 @@ def game():
     game_over = True
     running = True
     pygame.mixer.music.queue('Gi.mp3')
-    font_name = pygame.font.match_font('arial')
     musik = {1: "Satisfaction.mp3", 5: "The_road_without_you.mp3", 2: 'Angie.mp3', 3: "Another_Brick_In_The_Wall.mp3",
              4: 'Gi.mp3'}
 
     m_num = 0
+
     manager = pygame_gui.UIManager((1366, 768))
+
+    font_name = pygame.font.match_font('arial')
 
     def draw_text(surf, text, size, x, y):
         font = pygame.font.Font(font_name, size)
@@ -78,8 +103,6 @@ def game():
         surf.blit(text_surface, text_rect)
 
     background = load_image("fon_all.png")
-
-    # pygame.display.set_icon(load_image("iconca.ico"))
 
     class Particle(pygame.sprite.Sprite):
         # сгенерируем частицы разного размера
@@ -495,21 +518,19 @@ def game():
             pygame.time.set_timer(FISH_EL, 0)
 
             Fugu_POW = pygame.USEREVENT + 8
-            pygame.time.set_timer(Fugu_POW, 1000)
-            # random.randint(45000, 200000)
+            pygame.time.set_timer(Fugu_POW, random.randint(45000, 75000))
 
             FUGU_EL = pygame.USEREVENT + 9
             pygame.time.set_timer(FUGU_EL, 0)
 
             BLUEPERL = pygame.USEREVENT + 12
-            pygame.time.set_timer(BLUEPERL, random.randint(15000, 70000))
+            pygame.time.set_timer(BLUEPERL, random.randint(25000, 70000))
 
             GREENPERL = pygame.USEREVENT + 13
-            pygame.time.set_timer(GREENPERL, random.randint(75000, 150000))
+            pygame.time.set_timer(GREENPERL, random.randint(55000, 110000))
 
             SHARK = pygame.USEREVENT + 14
             pygame.time.set_timer(SHARK, random.randint(300000, 500000))
-
 
             FISHER = pygame.USEREVENT + 15
             pygame.time.set_timer(FISHER, random.randint(100000, 150000))
@@ -580,7 +601,6 @@ def game():
 
             if event.type == BLACK:
                 pygame.time.set_timer(BLACK, 0)
-                print(222)
                 running = False
 
             if event.type == SMALLSPEED:
@@ -621,8 +641,7 @@ def game():
 
             if player.live <= 0:
                 player.speed = 0
-                print(666)
-                pygame.time.set_timer(BLACK, 1)
+                pygame.time.set_timer(BLACK, 200)
 
         if player.background == 0:
             background = load_image("blood.png")
@@ -638,6 +657,9 @@ def game():
         draw_text(screen, str(player.score), 40, 30, 10)
         pygame.display.flip()
     pygame.quit()
+
+
+STATE = 'menu'
 
 
 class Player:
@@ -659,7 +681,12 @@ class Player:
         game()
 
     def game_overd(self):
-        game_over()
+        print(66)
+        con = sqlite3.connect('players.db')
+        result = con.cursor().execute(f"""SELECT score FROM player WHERE nickname=?
+                    """, (self.name,)).fetchone()
+        con.close()
+        game_over(result[0])
 
 
 class PasswordError(Exception):
@@ -696,7 +723,7 @@ if __name__ == '__main__':
     pygame.display.set_caption('Start')
     window_surface = pygame.display.set_mode((1366, 768))
 
-    #pygame.display.set_icon(load_image("eel_zn1.ico"))
+    # pygame.display.set_icon(load_image("eel_zn1.ico"))
 
     background = pygame.Surface((1366, 768))
 
@@ -866,7 +893,6 @@ if __name__ == '__main__':
                 line = password.text
                 line2 = clone_password.text
                 if line != line2:
-                    print(4)
                     raise IdentityError
                 f = False
                 if len(line) < 9:
@@ -1177,6 +1203,9 @@ if __name__ == '__main__':
                 clue.set_text('The payment amount was entered incorrectly.')
             else:
                 clue.set_text('Completed successfully. Thanks)')
+                pygame.mixer.music.load("money.mp3")
+                pygame.mixer.music.play(0)
+
 
         while running:
             menu.show()
