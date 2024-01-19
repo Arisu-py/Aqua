@@ -640,9 +640,6 @@ def game():
     pygame.quit()
 
 
-STATE = 'menu'
-
-
 class Player:
     def __init__(self, name):
         self.name = name
@@ -699,11 +696,10 @@ if __name__ == '__main__':
     pygame.display.set_caption('Start')
     window_surface = pygame.display.set_mode((1366, 768))
 
-    pygame.display.set_icon(load_image("eel_zn1.ico"))
+    #pygame.display.set_icon(load_image("eel_zn1.ico"))
 
     background = pygame.Surface((1366, 768))
 
-    background.fill(pygame.Color("#00416a"))
     manager = pygame_gui.UIManager((1366, 768))
 
     f = load_image("black.png")
@@ -712,32 +708,36 @@ if __name__ == '__main__':
 
     def main_menu():
         global STATE
+
+        f = load_image("black.png")
+        background.blit(f, (0, 0))
+
         sign_in = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((703, 250), (300, 50)),
+            relative_rect=pygame.Rect((483, 324), (300, 50)),
             text='Sign in',
             manager=manager
         )
 
         sign_up = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((703, 330), (300, 50)),
+            relative_rect=pygame.Rect((483, 404), (300, 50)),
             text='Sign up',
             manager=manager
         )
 
         end = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((703, 410), (300, 50)),
+            relative_rect=pygame.Rect((483, 484), (300, 50)),
             text='Exit',
             manager=manager
         )
 
         d = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((953, 490), (50, 50)),
+            relative_rect=pygame.Rect((733, 564), (50, 50)),
             text='D',
             manager=manager
         )
 
         menu = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((470, 20), (100, 50)),
+            relative_rect=pygame.Rect((583, 244), (100, 50)),
             text='Menu'
         )
 
@@ -803,9 +803,11 @@ if __name__ == '__main__':
 
 
     def registration():
-        nickname = pygame_gui.elements.UITextEntryLine(
-            relative_rect=pygame.Rect((343, 220), (400, 50)),
+        f = load_image("black.png")
+        background.blit(f, (0, 0))
 
+        nickname = pygame_gui.elements.UITextEntryLine(
+            relative_rect=pygame.Rect((343, 240), (400, 50)),
         )
 
         password = pygame_gui.elements.UITextEntryLine(
@@ -825,7 +827,7 @@ if __name__ == '__main__':
         )
 
         reg_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((633, 165), (100, 50)),
+            relative_rect=pygame.Rect((513, 150), (100, 50)),
             text='Registration'
         )
 
@@ -951,9 +953,8 @@ if __name__ == '__main__':
                         clone_pass_text.hide()
                         clue.hide()
                 manager.process_events(event)
-            background.fill('#00416a')
             manager.update(time_delta)
-            window_surface.blit(background, (0, 0))
+            window_surface.blit(f, (0, 0))
             manager.draw_ui(window_surface)
             pygame.display.update()
 
@@ -1060,9 +1061,8 @@ if __name__ == '__main__':
                         pass_text.hide()
                         clue.hide()
                 manager.process_events(event)
-            background.fill('#00416a')
             manager.update(time_delta)
-            window_surface.blit(background, (0, 0))
+            window_surface.blit(f, (0, 0))
             manager.draw_ui(window_surface)
             pygame.display.update()
 
@@ -1074,7 +1074,7 @@ if __name__ == '__main__':
         )
 
         card_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((433, 215), (100, 50)),
+            relative_rect=pygame.Rect((343, 215), (100, 50)),
             text='Card number:'
         )
 
@@ -1232,9 +1232,8 @@ if __name__ == '__main__':
                         ok.hide()
                         clue.hide()
                 manager.process_events(event)
-            background.fill('#00416a')
             manager.update(time_delta)
-            window_surface.blit(background, (0, 0))
+            window_surface.blit(f, (0, 0))
             manager.draw_ui(window_surface)
             pygame.display.update()
 
