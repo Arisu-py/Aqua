@@ -448,6 +448,7 @@ if __name__ == '__main__':
         card = pygame_gui.elements.UITextEntryLine(
             relative_rect=pygame.Rect((10, 100), (400, 50))
         )
+        card.set_text_hidden(is_hidden=True)
 
         monce_text = pygame_gui.elements.UILabel(
             relative_rect=pygame.Rect((10, 155), (100, 50)),
@@ -466,6 +467,7 @@ if __name__ == '__main__':
         card_csv = pygame_gui.elements.UITextEntryLine(
             relative_rect=pygame.Rect((180, 200), (150, 50))
         )
+        card_csv.set_text_hidden(is_hidden=True)
 
         summ_text = pygame_gui.elements.UILabel(
             relative_rect=pygame.Rect((10, 255), (100, 50)),
