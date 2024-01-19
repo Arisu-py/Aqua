@@ -165,12 +165,19 @@ def game():
             self.mask = pygame.mask.from_surface(self.image)
             self.rect.center = ((50 * player.live - 50 * player.live_1 - 10), 80)
 
+
         def update(self):
             if player.live_f:
                 for i in range(3 - player.live):
+                    all_sprites.remove(self)
                     hearts.remove(self)
                     all_sprites.remove(self)
-                player.live_f = False
+                    hearts.remove(self)
+                    player.live_f = False
+                    player.k += 1
+                    all_sprites.update()
+                    all_sprites.draw(screen)
+
 
             if player.live_f1:
                 for i in range(player.live - 1):
@@ -397,6 +404,7 @@ def game():
             self.live_f = False
             self.live_f1 = False
             self.background = 1
+            self.k = 0
 
         def update(self):
             keystate = pygame.key.get_pressed()
@@ -514,7 +522,8 @@ def game():
             pygame.time.set_timer(FISH_EL, 0)
 
             Fugu_POW = pygame.USEREVENT + 8
-            pygame.time.set_timer(Fugu_POW, random.randint(45000, 75000))
+            pygame.time.set_timer(Fugu_POW, 10000)
+            # random.randint(45000, 75000)
 
             FUGU_EL = pygame.USEREVENT + 9
             pygame.time.set_timer(FUGU_EL, 0)
@@ -523,7 +532,8 @@ def game():
             pygame.time.set_timer(BLUEPERL, random.randint(25000, 70000))
 
             GREENPERL = pygame.USEREVENT + 13
-            pygame.time.set_timer(GREENPERL, random.randint(55000, 110000))
+            pygame.time.set_timer(GREENPERL, 10000)
+            # random.randint(55000, 110000)
 
             SHARK = pygame.USEREVENT + 14
             pygame.time.set_timer(SHARK, 100000)
@@ -651,7 +661,11 @@ def game():
         screen.blit(background, (0, 0))
         all_sprites.update()
         all_sprites.draw(screen)
+        draw_text(screen, str(player.live), 150, 30, 10)
         draw_text(screen, str(player.score), 40, 30, 10)
+        if not player.live_f:
+            print(1)
+            draw_text(screen, str(player.k), 20, 200, 10)
         pygame.display.flip()
     pygame.quit()
     return player.score
@@ -679,7 +693,6 @@ class Player:
         self.different_in_max_score(game())
 
     def game_overd(self):
-        print(66)
         con = sqlite3.connect('players.db')
         result = con.cursor().execute(f"""SELECT score FROM player WHERE nickname=?
                     """, (self.name,)).fetchone()
