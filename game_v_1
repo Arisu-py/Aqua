@@ -6,10 +6,13 @@ import sys
 WIDTH = 1366
 HEIGHT = 768
 FPS = 60
+GRAVITY = -0.1
 
 pygame.init()
 pygame.mixer.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
+
+screen_rect = (0, 0, WIDTH, HEIGHT)
 
 pygame.display.set_caption("Aquarium")
 
@@ -47,6 +50,47 @@ def draw_text(surf, text, size, x, y):
 
 background = load_image("fon_all.png")
 pygame.display.set_icon(load_image("iconca.ico"))
+
+
+class Particle(pygame.sprite.Sprite):
+    # сгенерируем частицы разного размера
+    fire = [load_image("bubblee.png", colorkey=-1)]
+    for scale in (5, 10, 20):
+        fire.append(pygame.transform.scale(fire[0], (scale, scale)))
+
+    def __init__(self, pos, dx, dy):
+        super().__init__(all_sprites)
+        self.image = random.choice(self.fire)
+        self.rect = self.image.get_rect()
+
+        # у каждой частицы своя скорость — это вектор
+        self.velocity = [dx, dy]
+        # и свои координаты
+        self.rect.x, self.rect.y = pos
+
+        # гравитация будет одинаковой (значение константы)
+        self.gravity = GRAVITY
+
+    def update(self):
+        # применяем гравитационный эффект:
+        # движение с ускорением под действием гравитации
+        self.velocity[1] += self.gravity
+        # перемещаем частицу
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        # убиваем, если частица ушла за экран
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+
+
+def create_particles(position):
+    # количество создаваемых частиц
+    particle_count = 20
+    # возможные скорости
+    numbers = range(-5, 6)
+    for _ in range(particle_count):
+        Particle(position, random.choice(numbers), random.choice(numbers))
+
 
 class Perl(pygame.sprite.Sprite):
     def __init__(self):
@@ -231,7 +275,6 @@ class Fisher(pygame.sprite.Sprite):
             all_sprites.remove(self)
             if player.background != 0:
                 player.background = 3
-
 
 
 class Shark(pygame.sprite.Sprite):
@@ -567,6 +610,10 @@ while running:
                 pygame.mixer.music.pause()
             if event.key == pygame.K_u:
                 pygame.mixer.music.unpause()
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # создаём частицы по щелчку мыши
+            create_particles(pygame.mouse.get_pos())
 
     if player.background == 0:
         background = load_image("blood.png")
