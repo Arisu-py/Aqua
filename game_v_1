@@ -9,6 +9,11 @@ from string import digits
 
 STATE = 'menu'
 
+pygame.init()
+
+pygame.display.set_caption('Start')
+window_surface = pygame.display.set_mode((1366, 768))
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('data', name)
@@ -23,20 +28,11 @@ def load_image(name, colorkey=None):
     return image
 
 
-font_name = pygame.font.match_font('arial')
-
-
-def draw_text(surf, text, size, x, y):
-    font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, "white")
-    text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
-    surf.blit(text_surface, text_rect)
-
-
 def game_over(x):
     WIDTH = 1366
     HEIGHT = 768
+
+    pygame.init()
 
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
@@ -46,7 +42,7 @@ def game_over(x):
     font_name = pygame.font.match_font('arial')
 
     def draw_text(surf, text, size, x, y):
-        font = pygame.font.Font(font_name, size)
+        font = pygame.font.Font(font_name, 40)
         text_surface = font.render(text, True, "white")
         text_rect = text_surface.get_rect()
         text_rect.midtop = (x, y)
@@ -61,8 +57,8 @@ def game_over(x):
                 running = False
 
         print(x)
-        # draw_text(screen, str(x), 40, 30, 10)
         screen.blit(background, (0, 0))
+        draw_text(screen, str(x), 40, 30, 10)
         pygame.display.flip()
     pygame.quit()
 
@@ -530,7 +526,8 @@ def game():
             pygame.time.set_timer(GREENPERL, random.randint(55000, 110000))
 
             SHARK = pygame.USEREVENT + 14
-            pygame.time.set_timer(SHARK, random.randint(300000, 500000))
+            pygame.time.set_timer(SHARK, 100000)
+            random.randint(300000, 500000)
 
             FISHER = pygame.USEREVENT + 15
             pygame.time.set_timer(FISHER, random.randint(100000, 150000))
@@ -657,6 +654,7 @@ def game():
         draw_text(screen, str(player.score), 40, 30, 10)
         pygame.display.flip()
     pygame.quit()
+    return player.score
 
 
 STATE = 'menu'
@@ -678,7 +676,7 @@ class Player:
             con.close()
 
     def game_start(self):
-        game()
+        self.different_in_max_score(game())
 
     def game_overd(self):
         print(66)
@@ -718,12 +716,8 @@ class NicknameError(PasswordError):
 
 
 if __name__ == '__main__':
-    pygame.init()
 
-    pygame.display.set_caption('Start')
-    window_surface = pygame.display.set_mode((1366, 768))
-
-    # pygame.display.set_icon(load_image("eel_zn1.ico"))
+    pygame.display.set_icon(load_image("eel_zn1.ico"))
 
     background = pygame.Surface((1366, 768))
 
@@ -1095,12 +1089,12 @@ if __name__ == '__main__':
 
     def donate():
         menu = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((633, 165), (100, 50)),
+            relative_rect=pygame.Rect((503, 165), (100, 50)),
             text='Donate'
         )
 
         card_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((343, 215), (100, 50)),
+            relative_rect=pygame.Rect((345, 215), (100, 50)),
             text='Card number:'
         )
 
@@ -1111,7 +1105,7 @@ if __name__ == '__main__':
 
         monce_text = pygame_gui.elements.UILabel(
             relative_rect=pygame.Rect((343, 315), (100, 50)),
-            text='Monce/Year::'
+            text='Monce/Year:'
         )
 
         card_monce = pygame_gui.elements.UITextEntryLine(
@@ -1119,7 +1113,7 @@ if __name__ == '__main__':
         )
 
         csv_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((493, 315), (100, 50)),
+            relative_rect=pygame.Rect((500, 315), (100, 50)),
             text='CVC/CVV:'
         )
 
@@ -1129,7 +1123,7 @@ if __name__ == '__main__':
         card_csv.set_text_hidden(is_hidden=True)
 
         summ_text = pygame_gui.elements.UILabel(
-            relative_rect=pygame.Rect((343, 415), (100, 50)),
+            relative_rect=pygame.Rect((339, 415), (100, 50)),
             text='How much?:'
         )
 
@@ -1206,7 +1200,6 @@ if __name__ == '__main__':
                 pygame.mixer.music.load("money.mp3")
                 pygame.mixer.music.play(0)
 
-
         while running:
             menu.show()
             card.show()
@@ -1249,17 +1242,14 @@ if __name__ == '__main__':
                         checking()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        menu.hide()
-                        card.hide()
-                        card_text.hide()
-                        monce_text.hide()
-                        card_monce.hide()
-                        csv_text.hide()
-                        card_csv.hide()
-                        summ.hide()
-                        summ_text.hide()
-                        ok.hide()
-                        clue.hide()
+                        confirmation_dialog = pygame_gui.windows.UIConfirmationDialog(
+                            rect=pygame.Rect((300, 200), (300, 200)),
+                            manager=manager,
+                            window_title='Confirm',
+                            action_long_desc='Are you sure you want to get out? All data will be lost.',
+                            action_short_name='OK',
+                            blocking=True
+                        )
                 manager.process_events(event)
             manager.update(time_delta)
             window_surface.blit(f, (0, 0))
