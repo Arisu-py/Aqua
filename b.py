@@ -976,8 +976,14 @@ def menu():
         clone_password.set_text_hidden(is_hidden=True)
 
         registrate = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((783, 340), (200, 50)),
+            relative_rect=pygame.Rect((785, 310), (310, 50)),
             text='Sign up',
+            manager=manager
+        )
+
+        log = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((783, 370), (314, 50)),
+            text='Click if you already have an account',
             manager=manager
         )
 
@@ -1051,7 +1057,8 @@ def menu():
             except NicknameError:
                 clue.set_text("This name is already in use, select another one")
             else:
-                sign_up()
+                clue.set_text("Congratulations, you have successfully registered")
+                return True
 
         def sign_up():
             con = sqlite3.connect('players.db')
@@ -1072,6 +1079,7 @@ def menu():
             pass_text.show()
             clone_pass_text.show()
             clue.show()
+            log.show()
             time_delta = clock.tick(60) / 1000.0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1085,19 +1093,24 @@ def menu():
                     pass_text.hide()
                     clone_pass_text.hide()
                     clue.hide()
+                    log.hide()
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == registrate:
                         if check_password():
-                            running = False
-                            nickname.hide()
-                            password.hide()
-                            clone_password.hide()
-                            registrate.hide()
-                            reg_text.hide()
-                            nick_text.hide()
-                            pass_text.hide()
-                            clone_pass_text.hide()
-                            clue.hide()
+                            sign_up()
+                    if event.ui_element == log:
+                        running = False
+                        nickname.hide()
+                        password.hide()
+                        clone_password.hide()
+                        registrate.hide()
+                        reg_text.hide()
+                        nick_text.hide()
+                        pass_text.hide()
+                        clone_pass_text.hide()
+                        clue.hide()
+                        log.hide()
+                        enter()
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -1111,6 +1124,7 @@ def menu():
                         pass_text.hide()
                         clone_pass_text.hide()
                         clue.hide()
+                        log.hide()
                 manager.process_events(event)
             manager.update(time_delta)
             window_surface.blit(f, (0, 0))
@@ -1132,8 +1146,14 @@ def menu():
         password.set_text_hidden(is_hidden=True)
 
         enter_check = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((783, 320), (200, 50)),
+            relative_rect=pygame.Rect((793, 290), (300, 50)),
             text='Sign in',
+            manager=manager
+        )
+
+        reg = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((783, 350), (330, 50)),
+            text="Click if you don't have an account yet",
             manager=manager
         )
 
@@ -1189,6 +1209,7 @@ def menu():
             nick_text.show()
             pass_text.show()
             clue.show()
+            reg.show()
             time_delta = clock.tick(60) / 1000.0
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -1199,6 +1220,7 @@ def menu():
                     nick_text.hide()
                     pass_text.hide()
                     clue.hide()
+                    reg.hide()
                     running = False
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == enter_check:
@@ -1212,9 +1234,21 @@ def menu():
                             nick_text.hide()
                             pass_text.hide()
                             clue.hide()
+                            reg.hide()
                             player = Player_user(nick.text)
                             player.game_start()
                             player.game_overd()
+                    if event.ui_element == reg:
+                        running = False
+                        nick.hide()
+                        password.hide()
+                        enter_check.hide()
+                        enter_text.hide()
+                        nick_text.hide()
+                        pass_text.hide()
+                        clue.hide()
+                        reg.hide()
+                        registration()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         running = False
@@ -1225,6 +1259,7 @@ def menu():
                         nick_text.hide()
                         pass_text.hide()
                         clue.hide()
+                        reg.hide()
                 manager.process_events(event)
             manager.update(time_delta)
             window_surface.blit(f, (0, 0))
