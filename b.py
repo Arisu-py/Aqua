@@ -100,12 +100,6 @@ try:
             manager=manager
         )
 
-        resume = pygame_gui.elements.UIButton(
-            relative_rect=pygame.Rect((533, 600), (300, 50)),
-            text='Resume',
-            manager=manager
-        )
-
         end = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((866, 600), (300, 50)),
             text='Exit',
@@ -135,9 +129,6 @@ try:
                         run = False
                         STATE = 'menu'
                         menu()
-                    if event.ui_element == resume:
-                        run = False
-                        game()
                     if event.ui_element == end:
                         confirmation_dialog = pygame_gui.windows.UIConfirmationDialog(
                             rect=pygame.Rect((333, 160), (300, 200)),
