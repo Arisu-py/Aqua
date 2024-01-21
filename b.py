@@ -1131,7 +1131,6 @@ def menu():
             manager.draw_ui(window_surface)
             pygame.display.update()
 
-
     def enter():
         global STATE, player
         nick = pygame_gui.elements.UITextEntryLine(
@@ -1266,9 +1265,8 @@ def menu():
             manager.draw_ui(window_surface)
             pygame.display.update()
 
-
     def donate():
-        menu = pygame_gui.elements.UILabel(
+        menu_t = pygame_gui.elements.UILabel(
             relative_rect=pygame.Rect((503, 165), (100, 50)),
             text='Donate',
             manager=manager
@@ -1391,7 +1389,7 @@ def menu():
                 pygame.mixer.music.play(0)
 
         while running:
-            menu.show()
+            menu_t.show()
             card.show()
             card_text.show()
             monce_text.show()
@@ -1416,7 +1414,7 @@ def menu():
                 if event.type == pygame_gui.UI_CONFIRMATION_DIALOG_CONFIRMED:
                     run = False
                     running = False
-                    menu.hide()
+                    menu_t.hide()
                     card.hide()
                     card_text.hide()
                     monce_text.hide()
@@ -1445,7 +1443,6 @@ def menu():
             window_surface.blit(f, (0, 0))
             manager.draw_ui(window_surface)
             pygame.display.update()
-
 
     main_menu()
 
